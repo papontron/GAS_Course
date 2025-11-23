@@ -1,0 +1,38 @@
+# Unreal Engine generated files
+Binaries/
+Intermediate/
+Build/
+DerivedDataCache/
+*.sln
+*.xcodeproj
+*.xcworkspace
+.vscode/
+
+# Visual Studio files
+*.VC.db
+*.VC.opendb
+
+# Asset files (these are binary and should be handled perforce/alternative)
+*.uasset
+*.umap
+
+# Optional: If you want to include Content folder but exclude specific large files
+Content/**/*.mp4
+Content/**/*.wav
+Content/**/*.bmp
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project specific
+Saved/
+*.opensdf
+*.sdf
+*.suo
+*.log
