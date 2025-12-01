@@ -8,7 +8,7 @@
 
 class ACC_PlayerCharacter;
 class UTimelineComponent;
-
+class UCurveFloat;
 UCLASS()
 class GASCRASHCOURSE_API ACC_Enemycharacter : public ACC_BaseCharacter
 {
@@ -18,12 +18,13 @@ public:
 	// Sets default values for this character's properties
 	ACC_Enemycharacter();
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	UFUNCTION(Server, Reliable)
-	void Server_RotateTowardsTarget(ACC_PlayerCharacter* TargetCharacter);
-	UPROPERTY()
+	
+	
+	
+	UPROPERTY(VisibleDefaultsOnly)
 	UTimelineComponent* RotationTimeline;
-	UPROPERTY()
-	UCurveFloat* RotationCurve;
+	void RotateTowardsTarget();
+	float GetTimelineLength()const;
 #pragma region CustomMethods
 	virtual UAttributeSet* GetAttributeSet() const override;
 	float GetRadiusAcceptance() const { return RadiusAcceptance; }
@@ -32,6 +33,9 @@ public:
 	float GetSearchRate() const { return SearchRate;}
 	float GetSearchRadius() const { return SearchRadius;}
 	float GetAttackRange() const{ return AttackRange;}
+
+	void SetTargetActor(AActor* NewTargetActor);
+	AActor* GetTargetActor()const;
 	
 #pragma endregion CustomMethods
 protected:
@@ -41,10 +45,14 @@ protected:
 #pragma region CustomMethods
 	virtual void HandleRespawn() override;
 	virtual void HandleDeath() override;
+
+	
 #pragma endregion CustomMethods
 private:
 
 #pragma region Setup
+	
+	
 	UPROPERTY(EditDefaultsOnly, Category="Setup|Times")
 	float RespawnTimeSeconds = 5.f;
 	UPROPERTY(EditAnywhere, Category="Setup|AI")
@@ -59,6 +67,9 @@ private:
 	float SearchRadius = 2000.f;
 	UPROPERTY(EditAnywhere, Category="Setup|Combat")
 	float AttackRange = 700.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Setup|Curve")
+	TObjectPtr<UCurveFloat> RotationCurve;
 #pragma endregion
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
@@ -68,6 +79,8 @@ private:
 	FTimerHandle RespawnTimerHandle;
 	void OnUpdateTimeline(float Alpha);
 	void OnFinishedTimeline();
-	UPROPERTY()
-	ACC_PlayerCharacter* RotationTarget;
+	
+	void SetupRotationTimeline();
+
+	TWeakObjectPtr<AActor> TargetActor;
 };

@@ -2,6 +2,8 @@
 
 
 #include "GasCrashCourse/Public/Characters/CC_PlayerCharacter.h"
+
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystem/CC_AttributeSet.h"
 #include "Camera/CameraComponent.h"
@@ -58,6 +60,20 @@ UAttributeSet* ACC_PlayerCharacter::GetAttributeSet() const
 	if (const ACC_PlayerState* CC_PlayerState = Cast<ACC_PlayerState>(GetPlayerState())) return CC_PlayerState->GetAttributeSet();
 	return nullptr;
 		
+}
+
+void ACC_PlayerCharacter::SendHitEventToSelf_Implementation(const FGameplayTag EventTag, AActor* HitInstigator, FHitResult& HitResult)
+{
+	if (auto ASC = GetAbilitySystemComponent())
+	{
+		FGameplayEventData Payload;
+		Payload.Instigator = HitInstigator;
+		auto ContextHandle = ASC->MakeEffectContext();
+		ContextHandle.AddHitResult(HitResult);
+		Payload.ContextHandle = ContextHandle;
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, EventTag, Payload);
+	}
+	
 }
 
 // Called when the game starts or when spawned

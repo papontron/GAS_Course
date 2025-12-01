@@ -2,6 +2,11 @@
 
 namespace CCTags
 {
+	namespace SetByCaller
+	{
+		UE_DEFINE_GAMEPLAY_TAG(Projectile, "CCTags.SetByCaller.Projectile")
+		UE_DEFINE_GAMEPLAY_TAG(MeleeAttack, "CCTags.SetByCaller.MeleeAttack")
+	}
 	namespace Ability
 	{
 		UE_DEFINE_GAMEPLAY_TAG(AutoActivate,TEXT("CCTags.Ability.AutoActivate"))
@@ -15,6 +20,9 @@ namespace CCTags
 		namespace Enemy
 		{
 			UE_DEFINE_GAMEPLAY_TAG(Primary,"CCTags.Ability.Enemy.Primary")
+			UE_DEFINE_GAMEPLAY_TAG(SearchTarget, "CCTags.Ability.Enemy.SearchTarget")
+			UE_DEFINE_GAMEPLAY_TAG(MoveToLocation, "CCTags.Ability.Enemy.MoveToLocation")
+			UE_DEFINE_GAMEPLAY_TAG(AttackTarget, "CCTags.Ability.Enemy.AttackTarget")
 		}
 	}
 	namespace Event
@@ -32,9 +40,17 @@ namespace CCTags
 	namespace Status
 	{
 		UE_DEFINE_GAMEPLAY_TAG(Dead, "CCTags.Status.Dead")
+		UE_DEFINE_GAMEPLAY_TAG(HitReacting, "CCTags.Status.HitReacting")
 		namespace Enemy
 		{
 			UE_DEFINE_GAMEPLAY_TAG(Engaged, "CCTags.Status.Enemy.Engaged")
+		}
+	}
+	namespace GameplayCue
+	{
+		namespace Player
+		{
+			UE_DEFINE_GAMEPLAY_TAG(HitReact, "CCTags.GameplayCue.Player.HitReact")
 		}
 	}
 }

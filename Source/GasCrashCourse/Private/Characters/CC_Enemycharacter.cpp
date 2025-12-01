@@ -27,19 +27,24 @@ ACC_Enemycharacter::ACC_Enemycharacter()
 	//Rotation
 	
 	RotationTimeline = CreateDefaultSubobject<UTimelineComponent>("RotationTimeline");
-	ConstructorHelpers::FObjectFinder<UCurveFloat> CurveFinder(TEXT("/Game/Curves/RotationCurve.RotationCurve"));
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> CurveFinder(TEXT("/Game/Curves/RotationCurve.RotationCurve"));
 	if (CurveFinder.Succeeded())
 	{
-		//Bind the curve to the timeline
 		RotationCurve = CurveFinder.Object;
-		//on float update
-		FOnTimelineFloat TimelineProgress;
-		TimelineProgress.BindUFunction(this, FName("OnUpdateTimeline"));
-		RotationTimeline->AddInterpFloat(RotationCurve, TimelineProgress);
-		FOnTimelineEvent TimelineEvent;
-		TimelineEvent.BindUFunction(this, FName("OnFinishedTimeline"));
-		RotationTimeline->SetTimelineFinishedFunc(TimelineEvent);
 	}
+	// ConstructorHelpers::FObjectFinder<UCurveFloat> CurveFinder(TEXT("/Game/Curves/RotationCurve.RotationCurve"));
+	// if (CurveFinder.Succeeded())
+	// {
+	// 	//Bind the curve to the timeline
+	// 	RotationCurve = CurveFinder.Object;
+	// 	//on float update
+	// 	FOnTimelineFloat TimelineProgress;
+	// 	TimelineProgress.BindUFunction(this, FName("OnUpdateTimeline"));
+	// 	RotationTimeline->AddInterpFloat(RotationCurve, TimelineProgress);
+	// 	FOnTimelineEvent TimelineEvent;
+	// 	TimelineEvent.BindUFunction(this, FName("OnFinishedTimeline"));
+	// 	RotationTimeline->SetTimelineFinishedFunc(TimelineEvent);
+	// }
 }
 
 UAbilitySystemComponent* ACC_Enemycharacter::GetAbilitySystemComponent() const
@@ -47,22 +52,7 @@ UAbilitySystemComponent* ACC_Enemycharacter::GetAbilitySystemComponent() const
 	return AbilitySystemComponent;
 }
 
-void ACC_Enemycharacter::Server_RotateTowardsTarget_Implementation(ACC_PlayerCharacter* TargetCharacter)
-{
-	RotationTarget = TargetCharacter;
-	if (RotationTimeline)
-	{
-		RotationTimeline->PlayFromStart();
-	}else
-	{
-		UCC_GameplayStatics::PrintScreenDebugMessage(FString("TimelineNOTFOUND"));
-		RotationTimeline = FindComponentByClass<UTimelineComponent>();
-		if (RotationTimeline)
-		{
-			RotationTimeline->PlayFromStart();
-		}
-	}
-}
+
 
 
 
@@ -72,10 +62,24 @@ UAttributeSet* ACC_Enemycharacter::GetAttributeSet() const
 	return AttributeSet;
 }
 
+void ACC_Enemycharacter::SetTargetActor(AActor* NewTargetActor)
+{
+	if (TargetActor.Get() != NewTargetActor)
+	{
+		TargetActor = NewTargetActor;
+	}
+}
+
+AActor* ACC_Enemycharacter::GetTargetActor() const
+{
+	return TargetActor.Get();
+}
+
 // Called when the game starts or when spawned
 void ACC_Enemycharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	SetupRotationTimeline();
 	if (!IsValid(AbilitySystemComponent)) return;
 	AbilitySystemComponent->InitAbilityActorInfo(this,this);
 	OnASCInitialized.Broadcast(AbilitySystemComponent,AttributeSet);
@@ -127,9 +131,9 @@ void ACC_Enemycharacter::HandleDeath()
 void ACC_Enemycharacter::OnUpdateTimeline(float Alpha)
 {
 	UCC_GameplayStatics::PrintScreenDebugMessage(FString("Playing timeline"));
-	if (!IsValid(RotationTarget)) return;
+	if (TargetActor.IsValid()) return;
 	FRotator StartRotator = GetActorRotation();
-	FRotator TargetRotator = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), RotationTarget->GetActorLocation());
+	FRotator TargetRotator = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TargetActor->GetActorLocation());
 	FQuat TargetQuat = FQuat::Slerp(StartRotator.Quaternion(), TargetRotator.Quaternion(), Alpha);
 	SetActorRotation(TargetQuat.Rotator());
 }
@@ -137,4 +141,32 @@ void ACC_Enemycharacter::OnUpdateTimeline(float Alpha)
 void ACC_Enemycharacter::OnFinishedTimeline()
 {
 	UCC_GameplayStatics::PrintScreenDebugMessage(FString("Finished Playing timeline"));
+}
+
+void ACC_Enemycharacter::SetupRotationTimeline()
+{
+	if (!IsValid(RotationTimeline)||!IsValid(RotationCurve)) return;
+	// RotationTimeline->SetFloatCurve(RotationCurve, "RotationCurve");
+	FOnTimelineFloat TimelineProgressDelegate;
+	TimelineProgressDelegate.BindUFunction(this, "OnUpdateTimeline");
+	FOnTimelineEvent TimelineFinishedDelegate;
+	TimelineFinishedDelegate.BindUFunction(this, "OnFinishedTimeline");
+	RotationTimeline->AddInterpFloat(RotationCurve, TimelineProgressDelegate);
+	RotationTimeline->SetTimelineFinishedFunc(TimelineFinishedDelegate);
+}
+void ACC_Enemycharacter::RotateTowardsTarget()
+{
+	if (IsValid(RotationTimeline))
+	{
+		RotationTimeline->PlayFromStart();
+	}else
+	{
+		UCC_GameplayStatics::PrintScreenDebugMessage(FString("TimelineNOTFOUND"));
+	}
+}
+
+float ACC_Enemycharacter::GetTimelineLength() const
+{
+	if (!IsValid(RotationTimeline)) return .4f;
+	return RotationTimeline->GetTimelineLength();
 }

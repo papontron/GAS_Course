@@ -38,6 +38,23 @@ EHitDirection UCC_GameplayStatics::GetHitDirectionFromInstigator(const AActor* A
 	return EHitDirection::Front;
 }
 
+FName UCC_GameplayStatics::GetHitReactMontageSectionName(EHitDirection HitDirection)
+{
+	switch (HitDirection)
+	{
+		case EHitDirection::Front:
+		return FName("front");
+		case EHitDirection::Back:
+		return FName("back");
+		case EHitDirection::Left:
+		return FName("left");
+		case EHitDirection::Right:
+		default:
+		return FName("right");
+		
+	}
+}
+
 void UCC_GameplayStatics::PrintScreenDebugMessage(const FString& Message, float Duration, FColor Color)
 {
 	if (GEngine)
@@ -84,3 +101,5 @@ FFindClosestTargetResult UCC_GameplayStatics::FindClosesTargetWithTag(const UObj
 	Result.Target = ClosestActor;
 	return Result;
 }
+
+

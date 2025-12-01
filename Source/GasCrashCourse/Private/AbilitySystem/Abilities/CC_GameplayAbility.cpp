@@ -5,6 +5,7 @@
 #include "Tags/CC_GameplayTags.h"
 #include "AbilitySystemComponent.h"
 #include "Characters/CC_BaseCharacter.h"
+#include "Utils/CC_GameplayStatics.h"
 
 UCC_GameplayAbility::UCC_GameplayAbility()
 {
@@ -18,6 +19,7 @@ void UCC_GameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handl
                                           const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+	if (bDebug) UCC_GameplayStatics::PrintScreenDebugMessage(FString::Printf(TEXT("%s: Activated"), *GetName()));
 	if (!OwnerCharacter.IsValid())
 	{
 		OwnerCharacter = Cast<ACC_BaseCharacter>(GetAvatarActorFromActorInfo());
@@ -44,4 +46,9 @@ void UCC_GameplayAbility::CC_ApplyGameplayEffectToSelf(const TSubclassOf<UGamepl
 	GEngine->AddOnScreenDebugMessage(-1,5.f, FColor::Blue, *FString::Printf(TEXT("AbilityLevel: %d"), AbilityLevel));
 	const FGameplayEffectSpecHandle SpecHandle = GetAbilitySystemComponentFromActorInfo()->MakeOutgoingSpec(EffectClass, AbilityLevel, ContextHandle);
 	GetAbilitySystemComponentFromActorInfo()->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+}
+
+void UCC_GameplayAbility::CleanUpAndEndAbility(bool bWasCancelled)
+{
+	EndAbility(CurrentSpecHandle,CurrentActorInfo, CurrentActivationInfo, true, bWasCancelled);
 }

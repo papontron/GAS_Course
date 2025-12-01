@@ -4,39 +4,40 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystem/Abilities/CC_GameplayAbility.h"
-#include "CC_GA_SearchForTarget.generated.h"
+#include "CC_AttackTarget.generated.h"
 
-class ACC_EnemyController;
+class UAbilityTask_WaitDelay;
+class UAbilityTask_PlayMontageAndWait;
 class ACC_Enemycharacter;
 /**
  * 
  */
 UCLASS()
-class GASCRASHCOURSE_API UCC_GA_SearchForTarget : public UCC_GameplayAbility
+class GASCRASHCOURSE_API UCC_AttackTarget : public UCC_GameplayAbility
 {
 	GENERATED_BODY()
 public:
-	UCC_GA_SearchForTarget();
+	UCC_AttackTarget();
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 private:
-	TWeakObjectPtr<AActor> Target;
-	FTimerHandle FindTargetTimerHandle;
-	FTimerDelegate FindTargetTimerDelegate;
+	TWeakObjectPtr<ACC_Enemycharacter> EnemyOwner;
 	
-	FTimerHandle UpdateEngageStatusTimerHandle;
-	FTimerDelegate UpdateEngageStatusTimerDelegate;
+	UPROPERTY()
+	UAbilityTask_PlayMontageAndWait* PlayMontageTask;
+	UPROPERTY()
+	UAbilityTask_WaitDelay* WaitDelayTask;
+	void AttackTarget();
 	
-	TWeakObjectPtr<ACC_Enemycharacter> OwnerEnemy;
-	TWeakObjectPtr<ACC_EnemyController> AIController;
-
-	FGameplayEventData PrimaryAttackEventPayload;
-	
-	void FindTarget();
-	void StartFindTargetLoop();
-	void MoveToTargetWithinAttackRange();
-	
-	void UpdateEngagedStatus();
+	UFUNCTION()
+	void OnDelayFinished();
 
 	
+
+	FTimerHandle TryAttackTimerHandle;
+
+	void PlayTryAttackLoop();
+
+	void ActivateMoveToLocationAbilityAndCleanUp();
+	void GoBackToSearchTargetAndCleanUp();
 };

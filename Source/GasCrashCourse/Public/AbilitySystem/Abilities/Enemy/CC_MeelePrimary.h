@@ -4,48 +4,43 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystem/Abilities/CC_GameplayAbility.h"
-#include "CC_GA_RangedPrimary.generated.h"
+#include "CC_MeelePrimary.generated.h"
 
+class UNiagaraSystem;
 class ACC_Enemycharacter;
-class UTimelineComponent;
-class ACC_PlayerCharacter;
-class UAbilityTask_PlayMontageAndWait;
 class UAbilityTask_WaitGameplayEvent;
+class UAbilityTask_PlayMontageAndWait;
 /**
  * 
  */
 UCLASS()
-class GASCRASHCOURSE_API UCC_GA_RangedPrimary : public UCC_GameplayAbility
+class GASCRASHCOURSE_API UCC_MeleePrimary : public UCC_GameplayAbility
 {
 	GENERATED_BODY()
-	
 public:
-	UCC_GA_RangedPrimary();
+	UCC_MeleePrimary();
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 private:
 #pragma region Setup
+	UPROPERTY(EditDefaultsOnly, Category="Setup|VFX")
+	TObjectPtr<UNiagaraSystem> HitVFX;
 	UPROPERTY(EditDefaultsOnly, Category="Setup|Montage")
-	TObjectPtr<UAnimMontage> AttackMontage;
-	UPROPERTY(EditDefaultsOnly, Category="Setup|Projectile")
-	TSubclassOf<AActor> ProjectileClass;
-	UPROPERTY(EditDefaultsOnly, Category="Setup|Projectile")
-	FName SpawnProjectileSocketName;
+	TArray<UAnimMontage*> AttackMontages;
+	UPROPERTY(EditDefaultsOnly, Category="Setup|Collision")
+	TEnumAsByte<ECollisionChannel> HitCollisionChannel;
+	UPROPERTY(EditDefaultsOnly, Category="Setup|GameplayEffect")
+	TSubclassOf<UGameplayEffect> DamageEffect;
+	UPROPERTY(EditDefaultsOnly, Category="Setup|Damage", meta=(ClampMax=0))
+	float Damage = -15.f;
 #pragma endregion
-
-	UPROPERTY()
-	TWeakObjectPtr<ACC_PlayerCharacter> TargetCharacter;
-	UPROPERTY()
-	UAbilityTask_WaitGameplayEvent* WaitGameplayEventTask;
+	TWeakObjectPtr<ACC_Enemycharacter> EnemyOwner;
 	UPROPERTY()
 	UAbilityTask_PlayMontageAndWait* PlayMontageTask;
+	UPROPERTY()
+	UAbilityTask_WaitGameplayEvent* WaitGameplayEventTask;
+	void Attack();
 
-	UFUNCTION()
-	void OnEventReceived(FGameplayEventData EventData);
-
-	void PlayAttackMontage();
-	
-	//Play montage callbacks:
 	UFUNCTION()
 	void OnCompleted();
 	UFUNCTION()
@@ -55,8 +50,9 @@ private:
 	UFUNCTION()
 	void OnBlendOut();
 
-	void SpawnProjectile();
-	TWeakObjectPtr<ACC_Enemycharacter> EnemyOwner; //owner of this ability
+	UFUNCTION()
+	void OnEventReceived(FGameplayEventData Data);
 
-	void Attack();
+	void RotateToTarget(AActor* Target);
+	
 };

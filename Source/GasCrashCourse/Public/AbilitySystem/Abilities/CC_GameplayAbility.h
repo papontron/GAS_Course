@@ -22,4 +22,11 @@ protected:
 	TWeakObjectPtr<ACC_BaseCharacter> OwnerCharacter;
 	void CC_ApplyGameplayEffectToTarget(const TSubclassOf<UGameplayEffect>& EffectClass, UAbilitySystemComponent* TargetASC) const;
 	void CC_ApplyGameplayEffectToSelf(const TSubclassOf<UGameplayEffect>& EffectClass) const;
+
+	UPROPERTY(EditDefaultsOnly, Category="Setup|Debug")
+	bool bDebug = false;
+
+	void CleanUpAndEndAbility(bool bWasCancelled);
 };
+
+

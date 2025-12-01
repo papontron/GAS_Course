@@ -22,8 +22,7 @@ public:
 	TArray<UAnimMontage*> GetDeathMontages() const{ return DeathMontageArray;}
 	UFUNCTION(BlueprintCallable, Category = "CC|GameplayAbility")
 	int GetCurrentMontageIndex() const{	return CurrentMontageIndex;}
-	UFUNCTION(BlueprintCallable, Category="CC|GameplayAbility")
-	void CleanUpAndEndAbility(const bool bWasCancelled);
+
 private:
 #pragma region Setup
 	UPROPERTY(EditDefaultsOnly, Category="Setup|Montage")

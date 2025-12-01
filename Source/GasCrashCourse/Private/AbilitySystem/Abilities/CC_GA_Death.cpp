@@ -72,7 +72,3 @@ void UCC_GA_Death::OnCompleted()
 	CleanUpAndEndAbility(false);
 }
 
-void UCC_GA_Death::CleanUpAndEndAbility(const bool bWasCancelled)
-{
-	EndAbility(CurrentSpecHandle,CurrentActorInfo, CurrentActivationInfo, true, bWasCancelled);
-}

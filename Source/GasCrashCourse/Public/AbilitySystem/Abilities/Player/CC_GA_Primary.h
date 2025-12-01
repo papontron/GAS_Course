@@ -46,8 +46,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category="Setup|GameplayEffect")
 	TSubclassOf<UGameplayEffect> PrimaryDamageGameplayEffect;
 
-	UPROPERTY(EditDefaultsOnly, Category="Setup|Debug")
-	bool bDebug = false;
+	
 #pragma endregion
 	
 	TWeakObjectPtr<ACC_PlayerCharacter> CC_PlayerCharacter;

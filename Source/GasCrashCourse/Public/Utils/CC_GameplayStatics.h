@@ -29,9 +29,11 @@ class GASCRASHCOURSE_API UCC_GameplayStatics : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
+	UFUNCTION(BlueprintCallable, Category = "CC Utils")
 	static EHitDirection GetHitDirectionFromInstigator(const AActor* ActorHit, const AActor* Instigator, bool bDebug = false);
-
-	static void PrintScreenDebugMessage(const FString& Message, float Duration = 5.f, FColor Color = FColor::Emerald );
+	UFUNCTION(BlueprintCallable, Category = "CC Utils")
+	static FName GetHitReactMontageSectionName(EHitDirection HitDirection);
+	static void PrintScreenDebugMessage(const FString& Message, float Duration = 10.f, FColor Color = FColor::Emerald );
 
 	static void DrawDebugSphere(const UObject* UObject, const FVector& Center, float Radius,float Duration=5.f, FColor Color = FColor::Blue);
 
@@ -40,4 +42,6 @@ public:
 	static int GetRandomArrayIndex(const int ArraySize);
 
 	static FFindClosestTargetResult FindClosesTargetWithTag(const UObject* WorldContextObject,const FVector& Origin, FName TargetTag);
+
+	
 };

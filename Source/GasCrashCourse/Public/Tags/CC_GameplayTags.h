@@ -4,6 +4,11 @@
 
 namespace CCTags
 {
+	namespace SetByCaller
+	{
+		UE_DECLARE_GAMEPLAY_TAG_EXTERN(Projectile)
+		UE_DECLARE_GAMEPLAY_TAG_EXTERN(MeleeAttack)
+	}
 	namespace Ability
 	{
 		UE_DECLARE_GAMEPLAY_TAG_EXTERN(AutoActivate)
@@ -17,6 +22,9 @@ namespace CCTags
 		namespace Enemy
 		{
 			UE_DECLARE_GAMEPLAY_TAG_EXTERN(Primary)
+			UE_DECLARE_GAMEPLAY_TAG_EXTERN(SearchTarget)
+			UE_DECLARE_GAMEPLAY_TAG_EXTERN(MoveToLocation)
+			UE_DECLARE_GAMEPLAY_TAG_EXTERN(AttackTarget)
 		}
 	}
 	namespace Event
@@ -34,9 +42,17 @@ namespace CCTags
 	namespace Status
 	{
 		UE_DECLARE_GAMEPLAY_TAG_EXTERN(Dead)
+		UE_DECLARE_GAMEPLAY_TAG_EXTERN(HitReacting)
 		namespace Enemy
 		{
 			UE_DECLARE_GAMEPLAY_TAG_EXTERN(Engaged)
+		}
+	}
+	namespace GameplayCue
+	{
+		namespace Player
+		{
+			UE_DECLARE_GAMEPLAY_TAG_EXTERN(HitReact)
 		}
 	}
 }

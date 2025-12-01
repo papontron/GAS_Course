@@ -2,7 +2,6 @@
 
 
 #include "AbilitySystem/Abilities/Enemy/CC_GA_SearchForTarget.h"
-
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "Tags/CC_GameplayTags.h"
@@ -10,8 +9,10 @@
 #include "Characters/CC_PlayerCharacter.h"
 #include "Characters/CC_Enemycharacter.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "Navigation/PathFollowingComponent.h"
 #include "Player/CC_EnemyController.h"
 #include "Utils/CC_GameplayStatics.h"
+
 UCC_GA_SearchForTarget::UCC_GA_SearchForTarget()
 {
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
@@ -71,7 +72,7 @@ void UCC_GA_SearchForTarget::FindTarget()
 	{
 		GetWorld()->GetTimerManager().ClearTimer(UpdateEngageStatusTimerHandle);
 	}
-	//is the enemy is already engaged in battle, don't search another target
+	//if the enemy is already engaged in battle, don't search another target
 	if (GetAbilitySystemComponentFromActorInfo()->HasMatchingGameplayTag(CCTags::Status::Enemy::Engaged)) return;
 	FFindClosestTargetResult Result = UCC_GameplayStatics::FindClosesTargetWithTag(this, OwnerCharacter.Get()->GetActorLocation(), PlayerTag::PlayerTag);
 	if (!Result.Target.IsValid()) return;
@@ -94,11 +95,25 @@ void UCC_GA_SearchForTarget::FindTarget()
 void UCC_GA_SearchForTarget::MoveToTargetWithinAttackRange()
 {
 	if (!Target.IsValid() || !AIController.IsValid()) return;
-	float RandomAcceptanceRadius = FMath::FRandRange(0, OwnerEnemy->GetAttackRange());
-	AIController->MoveToActor(Target.Get(), RandomAcceptanceRadius);
-	//after reaching the actor, send gameplay event to this actor (attack order)
-	PrimaryAttackEventPayload.Instigator = Target.Get();
-	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(OwnerEnemy.Get(), CCTags::Event::Enemy::PrimaryAttack, PrimaryAttackEventPayload);
+	float RandomAcceptanceRadius = FMath::FRandRange(OwnerEnemy->GetRadiusAcceptance(), OwnerEnemy->GetAttackRange());
+
+	// FAIMoveRequest MoveRequest;
+	// MoveRequest.SetAcceptanceRadius(RandomAcceptanceRadius);
+	// MoveRequest.SetGoalActor(Target.Get());
+	// FNavPathSharedPtr NavPath;
+	// FPathFollowingRequestResult MoveRequestResult = AIController->MoveTo(MoveRequest);
+	
+	
+	const EPathFollowingRequestResult::Type Result = AIController->MoveToActor(Target.Get(), RandomAcceptanceRadius);
+	if (Result == EPathFollowingRequestResult::RequestSuccessful)
+	{
+		//Attack
+		//after reaching the actor, send gameplay event to this actor (attack order)
+		PrimaryAttackEventPayload.Instigator = Target.Get();
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(OwnerEnemy.Get(), CCTags::Event::Enemy::PrimaryAttack, PrimaryAttackEventPayload);
+	}
+	
+	
 }
 
 void UCC_GA_SearchForTarget::UpdateEngagedStatus()
@@ -119,7 +134,7 @@ void UCC_GA_SearchForTarget::UpdateEngagedStatus()
 			GetAbilitySystemComponentFromActorInfo()->RemoveLooseGameplayTag(CCTags::Status::Enemy::Engaged);
 			//restart the SearchTarget TimerEvent;
 			float Delay = FMath::FRandRange(0, OwnerEnemy->GetSearchRate());
-			GetWorld()->GetTimerManager().SetTimer(FindTargetTimerHandle, FindTargetTimerDelegate, 1.f, true, Delay);
+			GetWorld()->GetTimerManager().SetTimer(FindTargetTimerHandle, FindTargetTimerDelegate, 0.1f, true, Delay);
 		}else
 		{
 			PrimaryAttackEventPayload.Instigator = Target.Get(); //order to attack to the target actor

@@ -17,6 +17,7 @@ UCLASS()
 class GASCRASHCOURSE_API UCC_GA_HitReact : public UCC_GameplayAbility
 {
 	GENERATED_BODY()
+	
 public:
 	UCC_GA_HitReact();
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
@@ -24,12 +25,14 @@ public:
 	
 private:
 #pragma region Setup
-	UPROPERTY(EditDefaultsOnly, Category="Setup|Montage")
+	UPROPERTY(EditDefaultsOnly, Category="Setup|Montage", BlueprintReadOnly, meta=(AllowPrivateAccess=true))
 	TObjectPtr<UAnimMontage> HitReactMontage;
 	UPROPERTY(EditDefaultsOnly, Category="Setup|VFX")
 	TObjectPtr<UNiagaraSystem> HitReactVFX;
-	UPROPERTY(EditDefaultsOnly, Category="Setup|Debug")
-	bool bDebug = false;
+	UPROPERTY(EditDefaultsOnly, Category="Setup|Combat", meta=(ClampMin="0.1", ClampMax="1"))
+	float ChanceToHitReact = 0.2f;
+	UPROPERTY(EditDefaultsOnly, Category="Setup|Combat")
+	float DazeDuration = 1.5f;
 #pragma endregion
 	
 	UPROPERTY()
@@ -37,7 +40,7 @@ private:
 	UPROPERTY()
 	UAbilityTask_WaitGameplayEvent* WaitGameplayEventTask = nullptr;
 	void CC_CancelAbility();
-	void CleanUpAndEndAbility(const bool bWasCanceled);
+	FTimerHandle RemoveTagTimerHandle;
 
 	UFUNCTION()
 	void OnEventReceived(FGameplayEventData Payload);
@@ -52,5 +55,7 @@ private:
 	void OnCancelled();
 	UFUNCTION()
 	void OnCompleted();
-	
+
+	void RemoveHitReactingTag();
+	void SetRemoveTagTimer();
 };
